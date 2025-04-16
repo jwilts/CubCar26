@@ -1,0 +1,7 @@
+
+# Dependency list for project
+# mysql-connector-python  # MySQL driver
+# pillow                  # Image processing (if needed)
+# rpi_ws281x              # LED strip control
+# pyserial                # Serial communication
+# tkinter (usually included)  # GUI toolkit
