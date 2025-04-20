@@ -1,0 +1,87 @@
+Initialize Program (Load Settings, connect to database, read in race_statistics, configure connectivity to all devices and sensors, setup start state for all devices and sensors)
+Initialize GUI
+Loop // Main Loop
+    increment race counter
+    Display close starting gates modal
+    Loop
+        If (Gates closed) // Multiple ways gates can be wired. 
+            Close starting gates modal
+            Break
+        End If
+    End Loop 
+    If (Using Loading Modal) // Based on Race Mode (all modes but "Free")
+        For Each Lane on the Track
+            Loop
+                Read RFID Tag (From Pico)
+                Lookup Racer in Database
+                If (Racer Found)
+                    Assign to a Lane
+                    populate instance in race_manager with Racer, RFID, Lane, Race Counter, Race Mode Information
+                    Display racer information modal
+                    Highight with LEDS which lane car is to be on (LightBank)
+                    Loop
+                        Wait for RFID PAD button press 
+                    Close racer information modal
+                    Break Loop
+                If (Racer Not Found)
+                    Display Error            
+                End If (Racer Not Found)
+            End Loop for valid racer
+        End For Each Lane on Track
+        Wait for press and release of RFID PAD Button
+    Else (Not using Loading Modal)
+    // Nothing to do, skip straight to Timer modal check
+    End If (Not using loading Modal)
+    
+    If (Using Timer Modal) // drag, collaborate race modes
+        Display Timer Modal
+        Wait for 2.5 second hold on RFID PAD button
+        Activate Countdown Tree LEDS on ESP32 and on display
+        For Each Lane on the Track
+            Wait for capture of drag button push
+            If (button push or Slow_beaver_timeout)
+                If (race mode is collaborate)
+                    Only when last lane button is pushed do all relays get triggered simultaneously
+                    Reaction time and race start time is the same for all lanes
+                    Enable monitoring of IR sensors for all lanes
+                Else (race mode is not collaborate)
+                    Capture reaction time and race start time for lane
+                    Trigger lane relay on Remote ESP32
+                    Enable monitoring of IR Sensor for Lane
+                End if (race mode is collaborative)
+                Update Race_manager instance with starting information
+            End If
+        End for each Loop
+        Close Timer Modal, change focus to race_mode_grid
+    ELSE (Not using Timer Modal)
+        // Not monitoring drag start buttons.
+        // Used for starter and free modes.
+        if (starter race mode)
+            // Wait for press and release of RFID PAD button
+            // Trigger all relays on Remote ESP32
+            // Enable monitoring of IR sensors for all lanes
+            // Update Race_manager instance with starting information
+        Else if (Free race mode)
+            // No relays involved. Simple start switch indicates a start of the race
+            // Enable monitoring of IR sensors for all lanes
+            // No database to be updated in Free mode
+    End if using Timer Modal            
+    // Now in Race Mode 
+
+    For Each lane on the Track or not race timeout 
+        IF (IR Sensor Triggered) // Check only once per lane per race
+            // Capture race completion time for specified lane
+            // Calculate Race Duration
+            // recalculate finishing position for all completed cars
+            // Update race mode grid with all finishing information
+            // Update Race_Manager with finishing information
+            // stop monitoring IR sensor for lane
+    End for Loop
+    // at end of race
+    For each lane
+        if no IR sensor triggered for a given lane
+            Set race time to zero, reaction time to zero and finishing position to zero
+        Update Database with finishing information
+        Update GUI with updated race results
+    end for Loop
+End Main Loop
