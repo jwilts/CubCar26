@@ -1,10 +1,12 @@
 """
 race_manager.py
 
-Purpose: Manages race operations, including racer information, race results, and database interactions.
+Purpose: Manages race operations, including racer information, race results, lane tracking, and database interactions.
 """
 
 from db_handler import DatabaseHandler
+from threading import Lock
+
 
 class RaceManager:
     def __init__(self, db_handler, race_counter, heat, track_number, race_start_mode):
@@ -17,8 +19,37 @@ class RaceManager:
         self.track_number = track_number
         self.race_start_mode = race_start_mode.lower()  # Normalize mode
         self.racing_start_times = {}  # Store individual start times per lane
+
+        # Lane tracking
+        self.current_lane = 1  # Default starting lane
+        self.lock = Lock()  # Thread-safe lock for lane tracking
         print("Progress: RaceManager initialized.")
 
+    # Lane Tracking Methods
+    def increment_current_lane(self):
+        """
+        Increments the current lane in a thread-safe manner.
+        """
+        with self.lock:
+            self.current_lane += 1
+            print(f"Progress: Incremented current lane to {self.current_lane}.")
+
+    def reset_current_lane(self):
+        """
+        Resets the current lane to 1 in a thread-safe manner.
+        """
+        with self.lock:
+            self.current_lane = 1
+            print("Progress: Reset current lane to 1.")
+
+    def get_current_lane(self):
+        """
+        Retrieves the current lane in a thread-safe manner.
+        """
+        with self.lock:
+            return self.current_lane
+
+    # Race Management Methods
     def initialize_race_entry(self, race_id, lane, rfid, racer_info):
         if any(race["Lane"] == lane for race in self.races):
             return

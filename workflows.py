@@ -34,17 +34,7 @@ class RaceWorkflow:
         try:
             logger.info("Starting RaceWorkflow...")
             self.initialize_program()
-            while True:
-                self.increment_race_counter()
-                self.close_starting_gates()
-                if self.using_loading_modal():
-                    self.load_racers()
-                if self.using_timer_modal():
-                    self.start_race_with_timer()
-                else:
-                    self.start_race_without_timer()
-                self.monitor_race()
-                self.handle_race_completion()
+            self.gui.start()  # Start the GUI main loop
         except KeyboardInterrupt:
             logger.info("Shutdown requested")
         finally:
@@ -55,9 +45,8 @@ class RaceWorkflow:
         Initializes the program by setting up configuration, database connection, and devices.
         """
         logger.info("Initializing program...")
-        # TODO: Add logic for configuration and database setup.
         self.setup_gpio_and_relays()
-        self.gui.start()
+        self.gui.show_message("Program Initialized")
 
     def setup_gpio_and_relays(self):
         """
@@ -71,6 +60,7 @@ class RaceWorkflow:
         Increments the race counter.
         """
         self.race_manager.increment_race_counter()
+        logger.info(f"Race counter incremented to {self.race_manager.get_current_race_counter()}")
 
     def close_starting_gates(self):
         """
